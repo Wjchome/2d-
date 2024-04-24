@@ -182,7 +182,8 @@ buff类使用类似行动类来使用id用来作为唯一标识，但是在施�
             
             }
 
-由于继承了ScriptableObject，不能使用构造函数来初始化在施加buff时,颇显复杂，举例如下
+由于继承了ScriptableObject，不能使用构造函数来初始化在施加buff时,颇显复杂，举例如下  
+
         {
                     BuffType buffType = ScriptableObject.CreateInstance<buffType>();//此行是通用的  
                     buffType.Initialize(2);//初始化buff，如果有新参数，可加
@@ -302,6 +303,7 @@ buff类使用类似行动类来使用id用来作为唯一标识，但是在施�
             }
 
  PoisonBuff实现           
+   
             public class PoisonBuff : BuffClass
             {
             
