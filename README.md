@@ -196,6 +196,12 @@ buff类使用类似行动类来使用id用来作为唯一标识，但是在施�
 
 ### 举例说明如何创造新行动  
 1.最普通的攻击  
+它的效果是攻击单个敌人，范围是周围一格    
+![image](123/Sprite-0002.png)  
+白色是角色位置，蓝色为可攻击到的位置  
+![image](123/Sprite-0003.png)  
+红色为鼠标位置，也是攻击效果的位置，也就是说鼠标所在的位置也是目标的位置  
+
                         
             public class BoxingAction : InstantAction
             {
@@ -245,6 +251,7 @@ buff类使用类似行动类来使用id用来作为唯一标识，但是在施�
             
             }
 2.带buff的行动  
+此处举例为PoisonBowAction，也是一个远程攻击手段
 
             public class PoisonBowAction : InstantAction
             {
@@ -349,7 +356,150 @@ buff类使用类似行动类来使用id用来作为唯一标识，但是在施�
                 }
             }
             
-3.举例3
+3.攻击目标与鼠标位置不一致的攻击  
+看完上述例子，你可能会疑惑directions得作用，因为上述例子中，都是攻击目标与鼠标位置相同的例子  
+下边这个是不同的例子  
+它的效果是攻击范围是上下左右两格   
+![image](123/Sprite-0004.png)  
+白色是角色位置，蓝色为可攻击到的位置  
+![image](123/Sprite-0005.png)  
+红色为攻击效果的位置，也就是说鼠标所在的位置如果在（0,1）或者（0,2）中，攻击的范围均为红色位置  
+代码如下
+            public class LungeAction : InstantAction
+            {
+            //注意，其实上述第一个例子是没有这个的，而第二个例子是有的
+            //这个是投掷物，对于贴身近战，往往只用角色的动画表现即可，但是对于 弓（远程） 或者此例（长距离攻击），是需要其他游戏物体帮助的
+            //虽然他们对游戏逻辑不占用，但是对于玩家的体验来说至关重要
+                public GameObject missile;
+            
+               
+                private new void Awake()
+                { 
+                    actionID = 3;
+        
+                    base.Awake();
+                    //注意它的攻击范围
+                    pointToPoint = new List<Vector2> { new Vector2(1, 0), new Vector2(2, 0), new Vector2(0, 1), new Vector2(0, 2), new Vector2(-1, 0), new Vector2(-2, 0), new Vector2(0, -1), new Vector2(0, -2) };
+            
+            
+                    lastTimeAction = -100;
+                   //加载投掷物
+                    missile = GameObject.Instantiate(Resources.Load<GameObject>("Missile/LungeAction"));
+                    missile.SetActive(false);
+                }
+            
+            
+                public  override void  MakeDirection()
+                {
+              
+                        //设置攻击范围
+                    if (mouseRelativeSelf == new Vector2(2, 0)|| mouseRelativeSelf == new Vector2(1, 0))
+                    {            
+                        directions = new List<Vector2>() { allDirections[0], allDirections[1] };
+                    }
+                    else if (mouseRelativeSelf == new Vector2(-2, 0) || mouseRelativeSelf == new Vector2(-1, 0))
+                    {
+                        directions = new List<Vector2>() { allDirections[2], allDirections[3] };
+                    }
+                    else if (mouseRelativeSelf == new Vector2(0, 2) || mouseRelativeSelf == new Vector2(0, 1))
+                    {
+                        directions = new List<Vector2>() { allDirections[4], allDirections[5] };
+                    }
+                    else if (mouseRelativeSelf == new Vector2(0, -2) || mouseRelativeSelf == new Vector2(0, -1))
+                    {
+                        directions = new List<Vector2>() { allDirections[6], allDirections[7] };
+                    }
+                }
+                        //这个函数进行了重写，因为添加了投掷物
+                public override void MakeAnimator()
+                {
+                        
+                        
+                     base.MakeAnimator();
+            
+                        //投掷物的出现
+                    missile.SetActive(true);
+            
+            
+                    if (mouseRelativeSelf.y==0)
+                    {
+                        if(mouseRelativeSelf.x>0)
+                        {
+                            missile.transform.position=transform.position+new Vector3(1,0);
+                            missile.transform.rotation = Quaternion.identity;
+                        }
+                        else
+                        {
+                            missile.transform.position = transform.position - new Vector3(1, 0);
+                            missile.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
+                        }
+                    }
+                    else
+                    {
+                        if (mouseRelativeSelf.y > 0)
+                        {
+                            missile.transform.position = transform.position + new Vector3(0, 1);
+                            missile.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 90));
+                        }
+                        else
+                        {
+                            missile.transform.position = transform.position - new Vector3(0, 1);
+                            missile.transform.rotation = Quaternion.Euler(new Vector3(0, 0, -90));
+                        }
+                    }
+            
+            
+                    missile.GetComponent<Animator>().Play("1", 0, 0);
+            
+                    StartCoroutine(WaitForDestroyMission(0.5f));
+            
+                }
+            
+            
+            
+                public override IEnumerator CheckTarget()
+                {
+                    yield return new WaitForSeconds(0.8f * clipLength);
+            
+                    foreach (Vector2 direction in directions)
+                    {
+                        Vector2 targetPos = GridManager.Instance.WorldToGridPosition(transform.position) + direction;
+            
+                        if (GridManager.Instance.IsInBox(targetPos))
+                        {
+                            Grid targetGrid = GridManager.Instance.gridsXY[(int)targetPos.x, (int)targetPos.y];
+            
+            
+                            if (CheckIsMeetTarget(targetGrid.gridCharacter))
+                            {
+                                
+                                targetGrid.gridCharacter.ReceiveDamage(character, damage);
+                            }
+            
+            
+                        }
+                    }
+                     
+                    
+                }
+            
+            
+                
+            
+                        //隐藏投掷物
+                IEnumerator WaitForDestroyMission(float time)
+                {
+                    yield return new WaitForSeconds(time);
+            
+                    missile.SetActive(false);
+            
+                    missile.transform.position = new Vector2(100, 100);
+            
+                    
+                }
+            }
+
+
 
 
 
