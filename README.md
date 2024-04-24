@@ -34,8 +34,8 @@ InstantAction代表行动释放后，将会立即执行，不会造成位移
 WaitAction代表行动释放后，将会立即执行，但是会造成位移  
 
 ## 行动配置表
-行动配置表是在ActionClass的Awake()函数中进行
-1.类的结构
+行动配置表是在ActionClass的Awake()函数中进行  
+1.类的结构  
 public class ActionTypeInfo
 {
     public Type actionType { get; private set; }
@@ -68,14 +68,14 @@ public class ActionTypeInfo
       }
 }
 
-2.配置表
+2.配置表  
 public static Dictionary<int, ActionTypeInfo> actionIDToType = new Dictionary<int, ActionTypeInfo>()
 {
     {0, new ActionTypeInfo(typeof(Move), 10,2, "移动","移动至指定位置",0,1,1,1,TargetType.Space,true)},
     {1, new ActionTypeInfo(typeof(BoxingAction), 10,5, "武器攻击","攻击目标，造成一点伤害",1,1,1,1, TargetType.Character, true)},
     ......
 }
-3.ActionClass中的初始化，根据actionId
+3.ActionClass中的初始化，根据actionId  
 public void Awake()
 {   
     character = GetComponent<Character>();
@@ -96,8 +96,8 @@ public void InitActionValue()
 }
 
 
-### 举例说明如何创造新行动
-1.最普通的攻击
+### 举例说明如何创造新行动  
+1.最普通的攻击  
 public class BoxingAction : InstantAction
 {
 
