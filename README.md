@@ -97,7 +97,100 @@ WaitAction代表行动释放后，将会立即执行，但是会造成位移
                 targetType= SaveClass.actionIDToType[actionID].targetType;
             
             }
+## buff类介绍  
+buff类使用类似行动类来使用id用来作为唯一标识，但是在施加buff时并非储存id，而是一个List<BuffClass>  
+基类代码  
+            public abstract class BuffClass:ScriptableObject
+            {
+                public Sprite buffIcon;
+                public virtual string buffRealExplain
+                {
+                    get
+                    {
+                        if (isOnlyOne)
+                        {
+                            return "\n只能有一个";
+                        }
+                        else
+                        {
+                            if (isOverlap)
+                            {
+                                if (UpLimit == -1)
+                                {
+                                    return "\n可叠加";
+            
+                                }
+                                else
+                                {
+                                    return "\n可叠加,上限为" + UpLimit;
+                                }
+                            }
+                            else
+                            {
+                                return "\n可以有多个，但是不会叠加";
+                            }
+                        }
+                    }
+                }
+            
+                public int buffId; 
+                public void Initialize(int duration)
+                {
+                    this.duration = duration;
+            
+                    this.buffIcon = Resources.Load<Sprite>("Buff/"+GetType().Name);
+            
+                    InitBuffValue();
+            
+                }
+                public void InitBuffValue()
+                {
+                    buffName = SaveClass.buffIDToType[buffId].buffName;
+                    buffExplain = SaveClass.buffIDToType[buffId].buffName;
+                    isOnlyOne = SaveClass.buffIDToType[buffId].isOnlyOne;
+                    isOverlap = SaveClass.buffIDToType[buffId].isOverlap;
+                    UpLimit = SaveClass.buffIDToType[buffId].UpLimit;
+                    buffAttribute= SaveClass.buffIDToType[buffId].buffAttribute;
+                    
+            
+            
+                }
+            
+                public string buffName;
+            
+                public string buffExplain;
+            
+                public bool isOnlyOne;
+            
+                public bool isOverlap;
+            
+            
+                public int UpLimit=-1;//-1代表无上限
+            
+                public BuffAttribute buffAttribute;
+            
+            
+            
+                public int duration;
+            
+                public abstract void ApplyEffect(Character character);
+            
+                public abstract void TickBegin(Character character);// 检查位置 UIManager 每个角色开始回合时触发
+                
+                public abstract void TickEnd(Character character);// 检查位置 UIManager 每个角色开始结束时触发
+            
+            
+            }
 
+由于继承了ScriptableObject，不能使用构造函数来初始化在施加buff时,颇显复杂，举例如下
+        {
+                    BuffType buffType = ScriptableObject.CreateInstance<buffType>();//此行是通用的  
+                    buffType.Initialize(2);//初始化buff，如果有新参数，可加
+                    character.AddBuff(buffType);//对角色施加该buff
+        }
+
+
+        
 
 ### 举例说明如何创造新行动  
 1.最普通的攻击  
@@ -149,9 +242,110 @@ WaitAction代表行动释放后，将会立即执行，但是会造成位移
                 }
             
             }
-            
-            
+2.带buff的行动  
 
+            public class PoisonBowAction : InstantAction
+            {
+            
+            
+                private new void Awake()//同上述例子
+                {
+                    actionID = 38;
+                    base.Awake();
+                    for (int x = -3; x < 4; x++)
+                    {
+                        for (int y = -3; y < 4; y++)
+                        {
+                            pointToPoint.Add(new Vector2(x, y));//表明攻击的范围是一个正方形
+                        }
+                    }
+                    lastTimeAction = -100;
+                }
+                public override void MakeDirection()//同上述例子
+                {
+                    directions = new List<Vector2>() { mouseRelativeSelf };
+                }
+            
+            
+            
+                public override IEnumerator CheckTarget()
+                {
+                    yield return new WaitForSeconds(0.8f * clipLength);
+            
+                    foreach (Vector2 direction in directions)
+                    {
+                        Vector2 targetPos = selfVector2 + direction;
+            
+                        if (GridManager.Instance.IsInBox(targetPos))
+                        {
+                            Grid targetGrid = GridManager.Instance.gridsXY[(int)targetPos.x, (int)targetPos.y];
+            
+            
+                            if (CheckIsMeetTarget(targetGrid.gridCharacter))
+                            {
+            
+                                    //buff添加
+                                PoisonBuff poisonBuff = ScriptableObject.CreateInstance<PoisonBuff>();
+                                poisonBuff.Initialize(2);
+                                targetGrid.gridCharacter.AddBuff(poisonBuff);//对目标格子上的角色施加PoisonBuff
+                                    //此时只是增加buff，buff的具体实现在其他位置
+                                targetGrid.gridCharacter.ReceiveDamage(character, damage);
+            
+                        
+                            }
+            
+                        }
+                    }
+            
+                }
+            
+            }
+
+ PoisonBuff实现           
+            public class PoisonBuff : BuffClass
+            {
+            
+                public override string buffRealExplain
+                {
+                    get { return buffName + "\n在" + duration + "回合内" + buffExplain + base.buffRealExplain; }
+                }
+                public new void Initialize(int duration)
+                {
+            
+                    buffId = 16;
+            
+                    base.Initialize(duration);
+            
+                }
+            
+                public override void ApplyEffect(Character character)
+                {
+            
+                    character.ReceiveDamage(null, duration);
+            
+                }
+            
+                
+                public override void TickBegin(Character character)//实现回合开始时中毒
+                {
+                    ApplyEffect(character);
+                    duration--;
+                    if (duration <= 0)
+                    {
+            
+                        character.RemoveBuff(this);
+                    }
+                    
+            
+            
+                }
+            
+                public override void TickEnd(Character character)
+                {
+            
+                }
+            }
+            
 
 
 
