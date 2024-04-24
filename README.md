@@ -100,6 +100,7 @@ WaitAction代表行动释放后，将会立即执行，但是会造成位移
 ## buff类介绍  
 buff类使用类似行动类来使用id用来作为唯一标识，但是在施加buff时并非储存id，而是一个List<BuffClass>  
 基类代码  
+
             public abstract class BuffClass:ScriptableObject
             {
                 public Sprite buffIcon;
