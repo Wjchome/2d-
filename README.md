@@ -37,37 +37,37 @@ WaitAction代表行动释放后，将会立即执行，但是会造成位移
 行动配置表是在ActionClass的Awake()函数中进行  
 1.类的结构  
 
-public class ActionTypeInfo
-{
-    public Type actionType { get; private set; }
-     //商店中出现的权重
-    public int weightValue { get; private set; }
-     //商店中该行动的价格
-    public int price { get; private set; }
-    public string actionName { get; private set; }
-    public string actionExplain{ get; private set; }
-    public int damage, cooldown, actionPointCost, maxRedGridNum;
-    public TargetType targetType;
-    //这个是用来局外成长的，是否解锁
-    public bool isUnlock;
-    
-    
-      public ActionTypeInfo(Type actionType, int weightValue,int price,  string actionName, string actionExplain, 
-      int damage, int cooldown, int actionPointCost, int maxRedGridNum,TargetType targetType,bool isUnlock)
-      {
-          this.actionType = actionType;
-          this.weightValue = weightValue;
-          this.price = price;
-          this.actionName = actionName;
-          this.actionExplain = actionExplain;
-          this.damage = damage;
-          this.cooldown = cooldown;
-          this.actionPointCost = actionPointCost;
-          this.maxRedGridNum = maxRedGridNum;
-          this.targetType = targetType;
-          this.isUnlock = isUnlock;
-      }
-}
+            public class ActionTypeInfo
+            {
+                public Type actionType { get; private set; }
+                 //商店中出现的权重
+                public int weightValue { get; private set; }
+                 //商店中该行动的价格
+                public int price { get; private set; }
+                public string actionName { get; private set; }
+                public string actionExplain{ get; private set; }
+                public int damage, cooldown, actionPointCost, maxRedGridNum;
+                public TargetType targetType;
+                //这个是用来局外成长的，是否解锁
+                public bool isUnlock;
+                
+                
+              public ActionTypeInfo(Type actionType, int weightValue,int price,  string actionName, string actionExplain, 
+              int damage, int cooldown, int actionPointCost, int maxRedGridNum,TargetType targetType,bool isUnlock)
+              {
+                  this.actionType = actionType;
+                  this.weightValue = weightValue;
+                  this.price = price;
+                  this.actionName = actionName;
+                  this.actionExplain = actionExplain;
+                  this.damage = damage;
+                  this.cooldown = cooldown;
+                  this.actionPointCost = actionPointCost;
+                  this.maxRedGridNum = maxRedGridNum;
+                  this.targetType = targetType;
+                  this.isUnlock = isUnlock;
+              }
+            }
 
 2.配置表  
 
