@@ -36,6 +36,7 @@ WaitAction代表行动释放后，将会立即执行，但是会造成位移
 ## 行动配置表
 行动配置表是在ActionClass的Awake()函数中进行  
 1.类的结构  
+
 public class ActionTypeInfo
 {
     public Type actionType { get; private set; }
@@ -69,6 +70,7 @@ public class ActionTypeInfo
 }
 
 2.配置表  
+
 public static Dictionary<int, ActionTypeInfo> actionIDToType = new Dictionary<int, ActionTypeInfo>()
 {
     {0, new ActionTypeInfo(typeof(Move), 10,2, "移动","移动至指定位置",0,1,1,1,TargetType.Space,true)},
